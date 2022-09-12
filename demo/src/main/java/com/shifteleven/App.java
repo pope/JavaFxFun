@@ -1,6 +1,9 @@
 package com.shifteleven;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -19,11 +23,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.Arrays;
-
-import org.pdfsam.rxjavafx.observables.JavaFxObservable;
-
-import io.reactivex.rxjava3.core.Observable;
 
 /**
  * JavaFX App
@@ -59,32 +58,31 @@ public class App extends Application {
         HBox controls = new HBox(createSpacer(), pizzaTypeContainer, createSpacer(), extraIngredients, createSpacer(),
                 price, createSpacer());
         controls.setAlignment(Pos.TOP_CENTER);
-        controls.setPadding(new Insets(10,10,10,10));
+        controls.setPadding(new Insets(10, 10, 10, 10));
         controls.setSpacing(10);
 
-        Observable<Double> baseCost = JavaFxObservable.valuesOf(pizzaType.selectedToggleProperty())
-                .startWithItem(cheesePizza).map(toggle -> {
-                    if (toggle.equals(cheesePizza))
-                        return 10.00;
-                    if (toggle.equals(pepPizza))
-                        return 12.00;
-                    if (toggle.equals(vegPizza))
-                        return 11.50;
-                    throw new IllegalArgumentException("Unexpected toggle: " + toggle);
-                });
-        Observable<Double> extraCheeseCost = JavaFxObservable.valuesOf(extraCheese.selectedProperty())
-                .startWithItem(false).map(selected -> selected ? 1.99 : 0.0);
-        Observable<Double> baikenCost = JavaFxObservable.valuesOf(baikenTopping.selectedProperty())
-                .startWithItem(false).map(selected -> selected ? 2.99 : 0.0);
-        Observable<Double> mushroomsCost = JavaFxObservable.valuesOf(mushroomsTopping.selectedProperty())
-                .startWithItem(false).map(selected -> selected ? 0.99 : 0.0);
+        DoubleBinding baseCost = Bindings.createDoubleBinding(() -> {
+            Toggle toggle = pizzaType.getSelectedToggle();
+            if (toggle.equals(cheesePizza))
+                return 10.0;
+            if (toggle.equals(pepPizza))
+                return 13.0;
+            if (toggle.equals(vegPizza))
+                return 11.50;
+            throw new IllegalArgumentException("Unexpected toggle: " + toggle);
+
+        }, pizzaType.selectedToggleProperty());
+        DoubleBinding ingredientsCost = Bindings.createDoubleBinding(() -> {
+            double cheeseCost = extraCheese.isSelected() ? 1.99 : 0.0;
+            double baikenCost = baikenTopping.isSelected() ? 2.99 : 0.0;
+            double mushroomsCost = mushroomsTopping.isSelected() ? 0.99 : 0.0;
+            return cheeseCost + baikenCost + mushroomsCost;
+        }, extraCheese.selectedProperty(), baikenTopping.selectedProperty(), mushroomsTopping.selectedProperty());
+        DoubleBinding totalCost = baseCost.add(ingredientsCost);
 
         DecimalFormat df = new DecimalFormat("$####0.00");
-        Observable<String> cost = Observable.combineLatest(
-                Arrays.asList(baseCost, extraCheeseCost, baikenCost, mushroomsCost),
-                costs -> Arrays.stream(costs).mapToDouble(Double.class::cast).sum()).map(df::format);
-
-        cost.subscribe(price::setText);
+        StringBinding totalCostUi = Bindings.createStringBinding(() -> df.format(totalCost.get()), totalCost);
+        price.textProperty().bind(totalCostUi);
 
         scene = new Scene(controls, 640, 480);
         stage.setScene(scene);
