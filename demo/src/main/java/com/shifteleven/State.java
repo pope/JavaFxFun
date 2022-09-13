@@ -1,7 +1,6 @@
 package com.shifteleven;
 
 import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -37,12 +36,9 @@ public final class State {
         }
     }
 
-    private final AtomicReference<PizzaTypes> selectedPizza = new AtomicReference<>(PizzaTypes.CHEESE);
-    private final AtomicReference<ImmutableSet<ExtraIngredients>> extraIngredients = new AtomicReference<>(
-            ImmutableSet.of());
+    private PizzaTypes selectedPizza = PizzaTypes.CHEESE;
+    private ImmutableSet<ExtraIngredients> extraIngredients = ImmutableSet.of();
 
-    // TODO(pope): Verify if this is thread-safe.
-    // If not, I'm doing extra work for no reason.
     private final SimpleDoubleProperty totalCost = new SimpleDoubleProperty(0.00);
 
     State() {
@@ -50,7 +46,7 @@ public final class State {
     }
 
     public void setSelectedPizza(PizzaTypes pizza) {
-        selectedPizza.lazySet(pizza);
+        selectedPizza = pizza;
         updateTotals();
     }
 
@@ -63,29 +59,28 @@ public final class State {
     }
 
     public void addExtraIngredient(ExtraIngredients ingredient) {
-        extraIngredients.updateAndGet(prev -> {
-            if (prev.contains(ingredient)) {
-                return prev;
-            }
-            if (prev.isEmpty()) {
-                return Sets.immutableEnumSet(EnumSet.of(ingredient));
-            }
-            EnumSet<ExtraIngredients> current = EnumSet.copyOf(prev);
+        if (extraIngredients.contains(ingredient)) {
+            return;
+        }
+
+        if (extraIngredients.isEmpty()) {
+            extraIngredients = Sets.immutableEnumSet(EnumSet.of(ingredient));
+        } else {
+            EnumSet<ExtraIngredients> current = EnumSet.copyOf(extraIngredients);
             current.add(ingredient);
-            return Sets.immutableEnumSet(current);
-        });
+            extraIngredients = Sets.immutableEnumSet(current);
+        }
         updateTotals();
     }
 
     public void removeExtraIngredient(ExtraIngredients ingredient) {
-        extraIngredients.updateAndGet(prev -> {
-            if (!prev.contains(ingredient)) {
-                return prev;
-            }
-            EnumSet<ExtraIngredients> current = EnumSet.copyOf(prev);
-            current.remove(ingredient);
-            return Sets.immutableEnumSet(current);
-        });
+        if (!extraIngredients.contains(ingredient)) {
+            return;
+        }
+
+        EnumSet<ExtraIngredients> current = EnumSet.copyOf(extraIngredients);
+        current.remove(ingredient);
+        extraIngredients = Sets.immutableEnumSet(current);
         updateTotals();
     }
 
@@ -94,8 +89,8 @@ public final class State {
     }
 
     private void updateTotals() {
-        double cost = selectedPizza.get().amount;
-        for (ExtraIngredients ingredient : extraIngredients.get()) {
+        double cost = selectedPizza.amount;
+        for (ExtraIngredients ingredient : extraIngredients) {
             cost += ingredient.amount;
         }
         totalCost.set(cost);
