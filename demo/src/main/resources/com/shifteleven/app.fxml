@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shifteleven.AppController">
+    <children>
+        <Region HBox.hgrow="ALWAYS" />
+        <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0">
+            <children>
+                <Label text="Pizza">
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+                <RadioButton fx:id="cheesePizza" mnemonicParsing="false" onAction="#selectPizzaType" selected="true" text="Cheese">
+                    <toggleGroup>
+                        <ToggleGroup fx:id="pizzaType" />
+                    </toggleGroup>
+                </RadioButton>
+                <RadioButton fx:id="pepPizza" mnemonicParsing="false" onAction="#selectPizzaType" text="Pepperoni" toggleGroup="$pizzaType" />
+                <RadioButton fx:id="vegPizza" mnemonicParsing="false" onAction="#selectPizzaType" text="Veggie" toggleGroup="$pizzaType" />
+            </children>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0">
+            <children>
+                <Label text="Extra toppings">
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+                <CheckBox mnemonicParsing="false" onAction="#updateToppings" text="Extra Cheese" fx:id="xtraCheeseTop" />
+                <CheckBox fx:id="baikenTop" layoutX="10.0" layoutY="537.0" mnemonicParsing="false" onAction="#updateToppings" text="Bacon" />
+                <CheckBox fx:id="shroomsTop" layoutX="10.0" layoutY="550.0" mnemonicParsing="false" onAction="#updateToppings" text="Mushrooms" />
+            </children>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0">
+            <children>
+                <Label text="Total">
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+                <TextArea fx:id="total" editable="false" prefHeight="60.0" prefWidth="200.0" />
+            </children>
+        </VBox>
+        <Region layoutX="1356.0" layoutY="10.0" HBox.hgrow="ALWAYS" />
+    </children>
+</HBox>

@@ -1,4 +1,7 @@
 module com.shifteleven {
+    requires com.google.guice;
+    requires com.google.common;
+    
     requires transitive javafx.graphics;
     requires javafx.controls;
     requires javafx.fxml;
