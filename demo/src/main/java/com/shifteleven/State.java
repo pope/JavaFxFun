@@ -2,8 +2,6 @@ package com.shifteleven;
 
 import java.util.EnumSet;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 
 import javafx.beans.property.DoubleProperty;
@@ -37,7 +35,7 @@ public final class State {
     }
 
     private PizzaTypes selectedPizza = PizzaTypes.CHEESE;
-    private ImmutableSet<ExtraIngredients> extraIngredients = ImmutableSet.of();
+    private EnumSet<ExtraIngredients> extraIngredients = EnumSet.noneOf(ExtraIngredients.class);
 
     private final SimpleDoubleProperty totalCost = new SimpleDoubleProperty(0.00);
 
@@ -63,13 +61,7 @@ public final class State {
             return;
         }
 
-        if (extraIngredients.isEmpty()) {
-            extraIngredients = Sets.immutableEnumSet(EnumSet.of(ingredient));
-        } else {
-            EnumSet<ExtraIngredients> current = EnumSet.copyOf(extraIngredients);
-            current.add(ingredient);
-            extraIngredients = Sets.immutableEnumSet(current);
-        }
+        extraIngredients.add(ingredient);
         updateTotals();
     }
 
@@ -78,9 +70,7 @@ public final class State {
             return;
         }
 
-        EnumSet<ExtraIngredients> current = EnumSet.copyOf(extraIngredients);
-        current.remove(ingredient);
-        extraIngredients = Sets.immutableEnumSet(current);
+        extraIngredients.remove(ingredient);
         updateTotals();
     }
 
